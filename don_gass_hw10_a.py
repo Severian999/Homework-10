@@ -18,19 +18,7 @@ def cat_connect(sql_file):
     return conn, cur
 
 
-def get_datetimes(cursor, table_name, col_name):
-    """
-    :param cursor:  cursor from cat_connect()
-    :param table_name:  name of table to select data from
-    :param col_name:  column to return
-    :return:  data from col_name as list of tuples
-    """
-    cursor.execute('SELECT {cn} FROM {tn} ORDER BY {cn} ASC' \
-                   .format(cn=col_name, tn=table_name))
-    return cursor.fetchall()
-
-
-def get_focal_length(cursor, table_name, col_name):
+def get_data(cursor, table_name, col_name):
     """
     :param cursor:  cursor from cat_connect()
     :param table_name:  name of table to select data from
@@ -58,7 +46,7 @@ def convert_captured_data(captured_dates_times, captured_focal_lengths):
         if length[0] is None:
             continue
         else:
-            converted_length.append(length[0])
+            converted_length.append(float(length[0]))
     return converted_date, converted_length
 
 
@@ -143,17 +131,17 @@ def plot_focal_lengths(list_of_lengths, lengths_to_plot):
     plt.axvspan(3.97, 17.9, facecolor='blue', alpha=0.35)
     plt.axvspan(18, 140, facecolor='green', alpha=0.35)
 
-# CONSTANTS
+# DATABASE CONSTANTS
 TABLE_NAME = 'Adobe_images'
 TABLE_NAME2 = 'AgHarvestedExifMetadata'
 COL_NAME = 'captureTime'
 COL_NAME2 = 'focalLength'
-SQL_FILE = 'LightroomCatalog-2.lrcat'
+SQL_FILE = 'catsubset.sqlite3'
 
 # Main program
 CONN, CUR = cat_connect(SQL_FILE)
-CAPTURED_DATES_TIMES = get_datetimes(CUR, TABLE_NAME, COL_NAME)
-CAPTURED_FOCAL_LENGTHS = get_focal_length(CUR, TABLE_NAME2, COL_NAME2)
+CAPTURED_DATES_TIMES = get_data(CUR, TABLE_NAME, COL_NAME)
+CAPTURED_FOCAL_LENGTHS = get_data(CUR, TABLE_NAME2, COL_NAME2)
 CONN.close()
 CAPTURED_DATES, CAPTURED_LENGTHS = convert_captured_data(CAPTURED_DATES_TIMES,
                                                          CAPTURED_FOCAL_LENGTHS)
